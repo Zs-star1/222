@@ -1,0 +1,153 @@
+# خطة_الأسبوع_التمهيدي.py
+
+import datetime
+from enum import Enum
+import json
+
+# تعريف الفئات
+class Activity(Enum):
+    GREETING = 1
+    ENTERTAINMENT = 2
+    EDUCATIONAL = 3
+    SOCIAL = 4
+    SAFETY = 5
+    LEARNING_THROUGH_PLAY = 6
+    FAMILY_COMMUNICATION = 7
+    ERROR_MANAGEMENT = 8
+    PERFORMANCE = 9
+    MAINTENANCE = 10
+    TESTING = 11
+    DOCUMENTATION = 12
+    USER_EXPERIENCE = 13
+
+# هيكل البيانات
+class Student:
+    def __init__(self, name, comfort_level=5, safety_aware=True):
+        self.name = name
+        self.comfort_level = comfort_level
+        self.safety_aware = safety_aware
+
+class Session:
+    def __init__(self, date, activities, students):
+        self.date = date
+        self.activities = activities
+        self.students = students
+
+# الإعدادات الرئيسية
+class Settings:
+    def __init__(self):
+        self.color_scheme = "green"  # اللون الأخضر الفاتح كما طلبت
+        self.font = "Arial"
+        self.language = "العربية"
+
+# البرنامج الرئيسي
+class PreschoolWeekPlanner:
+    def __init__(self, settings):
+        self.settings = settings
+        self.current_date = datetime.date.today()
+        self.sessions = [
+            Session(
+                date=self.current_date + datetime.timedelta(days=i),
+                activities=[
+                    Activity.GREETING,
+                    Activity.ENTERTAINMENT,
+                    Activity.EDUCATIONAL,
+                    Activity.SOCIAL,
+                    Activity.SAFETY,
+                    Activity.LEARNING_THROUGH_PLAY,
+                    Activity.FAMILY_COMMUNICATION,
+                    Activity.ERROR_MANAGEMENT,
+                    Activity.PERFORMANCE,
+                    Activity.MAINTENANCE,
+                    Activity.TESTING,
+                    Activity.DOCUMENTATION,
+                    Activity.USER_EXPERIENCE
+                ],
+                students=[Student("أحمد", comfort_level=5, safety_aware=True)] * 10
+            )
+            for i in range(5)
+        ]
+
+    def add_session(self, new_date, activities, students):
+        new_session = Session(new_date, activities, students)
+        self.sessions.append(new_session)
+
+    def get_todays_session(self):
+        return self.sessions[0] if len(self.sessions) > 0 else None
+
+    def update_student_comfort(self, student_name, new_level):
+        for session in self.sessions:
+            for student in session.students:
+                if student.name == student_name:
+                    student.comfort_level = new_level
+                    break
+
+    def generate_report(self):
+        report = {
+            "الأسبوع التمهيدي": [
+                {
+                    "التاريخ": session.date.strftime("%d/%m/%Y"),
+                    "الأنشطة": [activity.value for activity in session.activities],
+                    "الطلاب": [student.name for student in session.students]
+                }
+                for session in self.sessions
+            ]
+        }
+        return json.dumps(report, ensure_ascii=False, indent=4)
+
+# واجهة المستخدم
+class UserInterface:
+    def __init__(self, planner):
+        self.planner = planner
+
+    def display_todays_session(self):
+        todays_session = self.planner.get_todays_session()
+        if todays_session:
+            print(f"تاريخ اليوم: {todays_session.date}")
+            print("الأنشطة:")
+            for activity in todays_session.activities:
+                print(activity.name)
+            print("الطلاب:")
+            for student in todays_session.students:
+                print(student.name)
+        else:
+            print("لا توجد جلسات مجدولة لهذا اليوم.")
+
+    def add_new_session(self, new_date, activities, students):
+        self.planner.add_session(new_date, activities, students)
+
+    def update_student_comfort(self, student_name, new_level):
+        self.planner.update_student_comfort(student_name, new_level)
+
+    def generate_report(self):
+        return self.planner.generate_report()
+
+# تشغيل البرنامج
+if __name__ == "__main__":
+    settings = Settings()
+    planner = PreschoolWeekPlanner(settings)
+    interface = UserInterface(planner)
+
+    while True:
+        print("1. عرض جلسة اليوم")
+        print("2. إضافة جلسة جديدة")
+        print("3. تحديث راحة الطالب")
+        print("4. توليد التقرير")
+        choice = input("اختر رقم الخيار: ")
+
+        if choice == "1":
+            interface.display_todays_session()
+        elif choice == "2":
+            new_date = datetime.date.today() + datetime.timedelta(days=1)
+            new_activities = [Activity.GREETING, Activity.ENTERTAINMENT]
+            new_students = [Student("علي", comfort_level=6, safety_aware=True)] * 8
+            interface.add_new_session(new_date, new_activities, new_students)
+        elif choice == "3":
+            student_name = input("أدخل اسم الطالب: ")
+            new_level = int(input("مستوى الراحة الجديد: "))
+            interface.update_student_comfort(student_name, new_level)
+        elif choice == "4":
+            report = interface.generate_report()
+            print(report)
+        else:
+            print("اختيار غير صحيح. الرجاء اختيار رقم صحيح.")
